@@ -70,17 +70,35 @@ class PaginationScraper:
         chrome_options.add_argument("--single-process")
         
         try:
+            # Method 1: Use ChromeDriverManager with browser_version parameter
+            chrome_version = os.popen("/snap/bin/chromium --version").read().strip().split()[-1]
+            logger.info(f"Detected Chrome version: {chrome_version}")
+            
             self.driver = webdriver.Chrome(
-                service=Service(ChromeDriverManager().install()),
+                service=Service(ChromeDriverManager(chrome_version=chrome_version).install()),
                 options=chrome_options
             )
+            
+            # If the above fails, try the alternative below
+            # self.driver = webdriver.Chrome(options=chrome_options)
+            
             self.driver.set_page_load_timeout(30)
             self.driver.maximize_window()
             logger.info("WebDriver setup complete.")
             return True
         except Exception as e:
             logger.error(f"Failed to setup WebDriver: {e}")
-            return False
+            try:
+                # Fallback method: Let Selenium handle driver version automatically
+                logger.info("Attempting fallback driver initialization...")
+                self.driver = webdriver.Chrome(options=chrome_options)
+                self.driver.set_page_load_timeout(30)
+                self.driver.maximize_window()
+                logger.info("WebDriver setup complete with fallback method.")
+                return True
+            except Exception as e2:
+                logger.error(f"Fallback initialization also failed: {e2}")
+                return False
     
     def create_csv_file(self):
         """Create a CSV file with headers if it doesn't exist."""
