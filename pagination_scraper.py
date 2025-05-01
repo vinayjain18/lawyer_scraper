@@ -62,7 +62,12 @@ class PaginationScraper:
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")  # Required for Linux
         chrome_options.add_argument("--window-size=1920,1080")
+        # Add these Linux-specific options
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--single-process")
         
         try:
             self.driver = webdriver.Chrome(
